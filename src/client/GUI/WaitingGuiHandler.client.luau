@@ -17,7 +17,7 @@ enableGuiEvent.OnClientEvent:Connect(function()
 		clone:Destroy()
 	end)
 
-	function timer()
+	local function timer()
 		local timernbr = 3
 
 		for i = timernbr, 0, -1 do
