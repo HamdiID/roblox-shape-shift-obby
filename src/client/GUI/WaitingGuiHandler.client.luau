@@ -1,10 +1,13 @@
 local RS = game:GetService("ReplicatedStorage")
-local leaveEvent = RS:WaitForChild("PairEvents"):WaitForChild("LeaveEvent")
-local timerEvent = RS:WaitForChild("PairEvents"):WaitForChild("TimerEvent")
 local player = game.Players.LocalPlayer
 local PlayerGui = player.PlayerGui
+
+local PairEvents = RS:WaitForChild("PairEvents")
+local leaveEvent = PairEvents:WaitForChild("LeaveEvent")
+local timerEvent = PairEvents:WaitForChild("TimerEvent")
 local gui = RS:WaitForChild("WaitingGui")
-local enableGuiEvent = RS:WaitForChild("PairEvents"):WaitForChild("EnableGuiEvent")
+local enableGuiEvent = PairEvents:WaitForChild("EnableGuiEvent")
+local teleportEvent = PairEvents:WaitForChild("TeleportToLevelEvent")
 
 enableGuiEvent.OnClientEvent:Connect(function()
 	local clone = gui:Clone()
@@ -24,7 +27,8 @@ enableGuiEvent.OnClientEvent:Connect(function()
 			textLabel.Text = i
 			task.wait(1)
 			if i == 0 then
-				gui:Destroy()
+				teleportEvent:FireServer()
+				clone:Destroy()
 			end
 		end
 	end

@@ -3,12 +3,14 @@ local machinesFolder = workspace:WaitForChild("Folder"):WaitForChild("Machines")
 local Players = game:GetService("Players")
 local RS = game:GetService("ReplicatedStorage")
 local TS = game:GetService("TweenService")
+local PairEvents = RS:WaitForChild("PairEvents")
 
-local disableControlsEvent = RS:WaitForChild("PairEvents"):WaitForChild("DisableControlsEvent")
-local enableControlsEvent = RS:WaitForChild("PairEvents"):WaitForChild("EnableControlsEvent")
-local leaveEvent = RS:WaitForChild("PairEvents"):WaitForChild("LeaveEvent")
-local enableGuiEvent = RS:WaitForChild("PairEvents"):WaitForChild("EnableGuiEvent")
-local timerEvent = RS:WaitForChild("PairEvents"):WaitForChild("TimerEvent")
+local disableControlsEvent = PairEvents:WaitForChild("DisableControlsEvent")
+local enableControlsEvent = PairEvents:WaitForChild("EnableControlsEvent")
+local leaveEvent = PairEvents:WaitForChild("LeaveEvent")
+local enableGuiEvent = PairEvents:WaitForChild("EnableGuiEvent")
+local timerEvent = PairEvents:WaitForChild("TimerEvent")
+local teleportEvent = PairEvents:WaitForChild("TeleportToLevelEvent")
 
 -- Récupère la vraie part tactile d’un pad (Pad1/Pad2 peuvent être un Model ou directement une Part)
 local function getTouchPart(container)
@@ -318,6 +320,54 @@ leaveEvent.OnServerEvent:Connect(function(player)
 	setPlayerName(padContainer, "")
 	setScreen(machineModel, padContainer, false)
 	activePad[player.UserId] = nil
+end)
+
+teleportEvent.OnServerEvent:Connect(function(player)
+	local teleportFolder = workspace:FindFirstChild("Folder"):FindFirstChild("Teleports")
+	if not teleportFolder then
+		warn("Dossier 'Teleports' introuvable dans le dossier 'Folder' de Workspace")
+		return
+	end
+	local dest = teleportFolder:FindFirstChild("LevelStart")
+
+	local character = player.Character
+	local hrp = character and character:FindFirstChild("HumanoidRootPart")
+	if not hrp then
+		return
+	end
+
+	-- TP serveur (autorité réseau)
+	hrp.CFrame = dest.CFrame
+
+	-- Défige + rend les contrôles
+	safeFreezeServer(character, false)
+	enableControlsEvent:FireClient(player)
+
+	-- TP sortie
+	hrp.CFrame = dest.CFrame
+	hrp.AssemblyLinearVelocity = Vector3.zero
+	hrp.AssemblyAngularVelocity = Vector3.zero
+
+	-- Récupère le pad et la machine associés à ce joueur, si existants
+	local data = activePad[player.UserId]
+	local padContainer = data and data.pad or nil
+	local machineModel = data and data.machine or nil
+
+	-- Ouvre la porte associée à CE pad uniquement si machineModel et padContainer existent
+	if machineModel and padContainer then
+		local tweenOpen = openDoor(machineModel, padContainer)
+		if tweenOpen then
+			tweenOpen.Completed:Wait()
+		else
+			task.wait(0.3)
+		end
+
+		-- Libère le pad et nettoie l’état
+		setBusy(padContainer, false)
+		setPlayerName(padContainer, "")
+		setScreen(machineModel, padContainer, false)
+		activePad[player.UserId] = nil
+	end
 end)
 
 local function attachBothBusyWatcher(machineModel, padContainer)
