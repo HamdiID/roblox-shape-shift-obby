@@ -442,3 +442,52 @@ end
 machinesFolder.ChildAdded:Connect(function(child)
 	task.defer(connectMachine, child)
 end)
+
+-- Lorsque le joueur quitte le jeu, s'il était actif sur une machine on libère proprement le pad
+Players.PlayerRemoving:Connect(function(player)
+	local data = activePad[player.UserId]
+	if not data then
+		return
+	end
+
+	local padContainer = data.pad
+	local machineModel = data.machine
+
+	-- Ouvre la porte associée à CE pad uniquement si configurée
+	if machineModel and padContainer then
+		local ok, tweenOpen = pcall(function()
+			return openDoor(machineModel, padContainer)
+		end)
+		if ok and tweenOpen then
+			-- protected wait car le tween peut parfois être nil ou l'objet détruit
+			pcall(function()
+				tweenOpen.Completed:Wait()
+			end)
+		else
+			task.wait(0.3)
+		end
+	end
+
+	-- Libère le pad et nettoie l'état
+	if padContainer then
+		pcall(function()
+			setBusy(padContainer, false)
+			setPlayerName(padContainer, "")
+		end)
+	end
+	if machineModel and padContainer then
+		pcall(function()
+			setScreen(machineModel, padContainer, false)
+		end)
+	end
+
+	activePad[player.UserId] = nil
+
+	-- Nettoie la table de debounce "busy"
+	if busy[player.UserId] then
+		busy[player.UserId][machineModel] = nil
+		if next(busy[player.UserId]) == nil then
+			busy[player.UserId] = nil
+		end
+	end
+end)
