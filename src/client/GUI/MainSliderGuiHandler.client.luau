@@ -9,6 +9,7 @@ local OutputLabel = Slider.Parent.Slider.Label
 
 local rs = game:GetService("ReplicatedStorage")
 local event = rs:WaitForChild("SliderEvents").SizeChange
+local mainGuiEvent = rs:WaitForChild("PairEvents"):WaitForChild("MainGuiEvent")
 
 Fill.Size = UDim2.fromScale(1, OutputValue.Value)
 OutputLabel.Text = ("X " .. tostring(math.round(OutputValue.Value * 100) / 100) * 2)
@@ -50,4 +51,8 @@ game:GetService("UserInputService").InputEnded:Connect(function(input)
 	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
 		sliderActive = false
 	end
+end)
+
+mainGuiEvent.OnClientEvent:Connect(function(value)
+	gui.Enabled = value
 end)

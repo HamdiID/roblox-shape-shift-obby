@@ -11,6 +11,7 @@ local leaveEvent = PairEvents:WaitForChild("LeaveEvent")
 local enableGuiEvent = PairEvents:WaitForChild("EnableGuiEvent")
 local timerEvent = PairEvents:WaitForChild("TimerEvent")
 local teleportEvent = PairEvents:WaitForChild("TeleportToLevelEvent")
+local mainGuiEvent = PairEvents:WaitForChild("MainGuiEvent")
 
 -- Récupère la vraie part tactile d’un pad (Pad1/Pad2 peuvent être un Model ou directement une Part)
 local function getTouchPart(container)
@@ -352,6 +353,8 @@ teleportEvent.OnServerEvent:Connect(function(player)
 	local data = activePad[player.UserId]
 	local padContainer = data and data.pad or nil
 	local machineModel = data and data.machine or nil
+
+	mainGuiEvent:FireClient(player, true)
 
 	-- Ouvre la porte associée à CE pad uniquement si machineModel et padContainer existent
 	if machineModel and padContainer then

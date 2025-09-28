@@ -14,6 +14,7 @@ local events = {
 	Human = rs:WaitForChild("ShapeShiftEvents"):WaitForChild("HumanEvents"):WaitForChild("Transform"),
 	Square = rs:WaitForChild("ShapeShiftEvents"):WaitForChild("SquareEvents"):WaitForChild("Transform"),
 	Wedge = rs:WaitForChild("ShapeShiftEvents"):WaitForChild("WedgeEvents"):WaitForChild("Transform"),
+	mainGuiEvent = rs:WaitForChild("PairEvents"):WaitForChild("MainGuiEvent"),
 }
 
 -- Mapping des touches aux types d'événements
@@ -58,4 +59,8 @@ UserInputService.InputBegan:Connect(function(inputObject, gameProcessedEvent)
 		sound:Play() -- Jouer le son
 		print("Événement déclenché :", eventType)
 	end
+end)
+
+events.mainGuiEvent.OnClientEvent:Connect(function(value)
+	gui.Enabled = value
 end)
