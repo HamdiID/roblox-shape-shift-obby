@@ -28,10 +28,15 @@ The main concept is that players can **change their shape** to overcome obstacle
 
 ## 📂 Project Structure
 ShapeShiftObby/
+
 │── src/
+
 │ ├── server/ # Server-side scripts (game logic, events, checkpoints)
+
 │ ├── client/ # Client-side scripts (UI, player controls, camera effects)
+
 │ ├── shared/ # Shared modules (ReplicatedStorage: events, modules, constants)
+
 │
 
 ---
