@@ -27,3 +27,28 @@ The main concept is that players can **change their shape** to overcome obstacle
 ---
 
 ## 📂 Project Structure
+ShapeShiftObby/
+│── src/
+│ ├── server/ # Server-side scripts (game logic, events, checkpoints)
+│ ├── client/ # Client-side scripts (UI, player controls, camera effects)
+│ ├── shared/ # Shared modules (ReplicatedStorage: events, modules, constants)
+│
+
+---
+
+## 📸 Screenshots / Gameplay
+
+---
+
+## 🚀 Play the Game
+👉 Available on Roblox: [Shape Shift Obby](https://www.roblox.com/) *gamelink*  
+
+---
+
+## 👨‍💻 Author
+Developed by **NJBESS**  
+- 🎓 Bachelor in **Application and Software Development**
+- Passionate about **game development, scripting and design**  
+- 🌐 [Portfolio](https://hamdid.github.io) | [GitHub](https://github.com/HamdiID)
+
+ 
