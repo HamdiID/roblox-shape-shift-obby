@@ -21,7 +21,7 @@ The main concept is that players can **change their shape** to overcome obstacle
 ## 🛠️ Technologies & Tools
 - **Roblox Studio** – level design, modeling, scripting.  
 - **Luau (Roblox Lua)** – scripting mechanics, multiplayer logic.  
-- **Photopea** – UI/graphic design.  
+- **Photopea and Figma** – UI/graphic design.  
 - **Trello** – project management and task tracking.  
 
 ---
