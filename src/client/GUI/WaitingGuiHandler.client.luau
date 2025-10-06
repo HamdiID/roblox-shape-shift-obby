@@ -8,6 +8,7 @@ local timerEvent = PairEvents:WaitForChild("TimerEvent")
 local gui = RS:WaitForChild("WaitingGui")
 local enableGuiEvent = PairEvents:WaitForChild("EnableGuiEvent")
 local teleportEvent = PairEvents:WaitForChild("TeleportToLevelEvent")
+local pairEvent = PairEvents:WaitForChild("PairEvent")
 
 enableGuiEvent.OnClientEvent:Connect(function()
 	local clone = gui:Clone()
@@ -20,7 +21,7 @@ enableGuiEvent.OnClientEvent:Connect(function()
 		clone:Destroy()
 	end)
 
-	local function timer()
+	local function timer(machineModel)
 		local timernbr = 3
 
 		for i = timernbr, 0, -1 do
@@ -28,12 +29,13 @@ enableGuiEvent.OnClientEvent:Connect(function()
 			task.wait(1)
 			if i == 0 then
 				teleportEvent:FireServer()
+				pairEvent:FireServer(machineModel)
 				clone:Destroy()
 			end
 		end
 	end
 
-	timerEvent.OnClientEvent:Connect(function()
-		timer()
+	timerEvent.OnClientEvent:Connect(function(machineModel)
+		timer(machineModel)
 	end)
 end)

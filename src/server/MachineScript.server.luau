@@ -12,6 +12,7 @@ local enableGuiEvent = PairEvents:WaitForChild("EnableGuiEvent")
 local timerEvent = PairEvents:WaitForChild("TimerEvent")
 local teleportEvent = PairEvents:WaitForChild("TeleportToLevelEvent")
 local mainGuiEvent = PairEvents:WaitForChild("MainGuiEvent")
+local pairEvent = PairEvents:WaitForChild("PairEvent")
 
 -- Récupère la vraie part tactile d’un pad (Pad1/Pad2 peuvent être un Model ou directement une Part)
 local function getTouchPart(container)
@@ -54,6 +55,12 @@ local function getTeleportPart(machineModel, padContainer)
 			("Destination '%s' introuvable ou invalide dans la machine %s"):format(targetName, machineModel.Name)
 	end
 	return target
+end
+
+local function unpair(player)
+	local otherPlayer = player:GetAttribute("IsPairedWith")
+	player:SetAttribute("IsPairedWith", "")
+	otherPlayer:SetAttribute("IsPairedWith", "")
 end
 
 local function getTeleportOutPart(machineModel, padContainer)
@@ -373,6 +380,23 @@ teleportEvent.OnServerEvent:Connect(function(player)
 	end
 end)
 
+pairEvent.OnServerEvent:Connect(function(player)
+	local otherPad
+	local data = activePad[player.UserId]
+	local padContainer = data and data.pad or nil
+	local machineModel = data and data.machine or nil
+
+	if padContainer.Name == "Pad1" then
+		otherPad = machineModel:FindFirstChild("Pad2")
+	else
+		otherPad = machineModel:FindFirstChild("Pad1")
+	end
+
+	-- Evite d'assigner nil (SetAttribute(name, nil) supprime l'attribut).
+	-- On met une chaîne vide quand il n'y a pas de joueur pairé.
+	player:SetAttribute("IsPairedWith", getPlayerName(otherPad) or "")
+end)
+
 local function attachBothBusyWatcher(machineModel, padContainer)
 	local pad1 = machineModel:FindFirstChild("Pad1")
 	local pad2 = machineModel:FindFirstChild("Pad2")
@@ -391,7 +415,7 @@ local function attachBothBusyWatcher(machineModel, padContainer)
 		if both and not announced then
 			print("Deux pads occupés")
 			machineModel:SetAttribute("BothBusyAnnounced", true)
-			timerEvent:FireClient(player)
+			timerEvent:FireClient(player, padContainer)
 		elseif not both and announced then
 			-- on se réarme pour un prochain “both busy”
 			machineModel:SetAttribute("BothBusyAnnounced", false)
@@ -493,4 +517,10 @@ Players.PlayerRemoving:Connect(function(player)
 			busy[player.UserId] = nil
 		end
 	end
+end)
+
+Players.PlayerAdded:Connect(function(player)
+	-- Initialisation explicite : utiliser une valeur non-nil pour créer
+	-- l'attribut côté serveur (SetAttribute(..., nil) le supprime).
+	player:SetAttribute("IsPairedWith", "")
 end)

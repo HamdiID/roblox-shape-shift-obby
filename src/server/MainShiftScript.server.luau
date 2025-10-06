@@ -45,6 +45,10 @@ local function MakeCharacterInvisibleAndNonCollidable(char)
 		if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
 			part.Transparency = 1
 			part.CanCollide = false
+			-- Empêche la masse du personnage d'influencer la physique
+			if part.Massless ~= nil then
+				part.Massless = true
+			end
 		end
 	end
 end
@@ -72,6 +76,14 @@ TransformBallEvent.OnServerEvent:Connect(function(player)
 
 	MakeCharacterInvisibleAndNonCollidable(char)
 
+	-- Rendre aussi le HumanoidRootPart non-collidable et massless
+	if HRP then
+		HRP.CanCollide = false
+		if HRP.Massless ~= nil then
+			HRP.Massless = true
+		end
+	end
+
 	local marble = Instance.new("Part")
 	local baseSize = baseSizes.Ball
 	local multiplier = playerSizeMultipliers[player.UserId] or 1
@@ -89,6 +101,13 @@ TransformBallEvent.OnServerEvent:Connect(function(player)
 	marble.TopSurface = "Studs"
 	marble.Position = HRP.Position
 	marble.Parent = char
+
+	-- Forcer la simulation physique côté serveur pour éviter la latence/client-side oddities
+	pcall(function()
+		if marble.SetNetworkOwner then
+			marble:SetNetworkOwner(nil)
+		end
+	end)
 
 	BallCameraEvent:FireClient(player)
 
@@ -191,6 +210,21 @@ TransformSquareEvent.OnServerEvent:Connect(function(player)
 	square.CFrame = CFrame.new(rootPosition, rootPosition + lookDirection)
 	square.Parent = char
 
+	-- Forcer la simulation physique côté serveur
+	pcall(function()
+		if square.SetNetworkOwner then
+			square:SetNetworkOwner(nil)
+		end
+	end)
+
+	-- Rendre aussi le HumanoidRootPart non-collidable et massless
+	if HRP then
+		HRP.CanCollide = false
+		if HRP.Massless ~= nil then
+			HRP.Massless = true
+		end
+	end
+
 	local Hum = char:FindFirstChild("Humanoid")
 	if not Hum then
 		warn("Humanoid introuvable pour " .. player.Name)
@@ -273,6 +307,13 @@ TransformWedgeEvent.OnServerEvent:Connect(function(player)
 	wedge.CFrame = CFrame.new(rootPosition, rootPosition + lookDirection)
 	wedge.Parent = char
 
+	-- Forcer la simulation physique côté serveur
+	pcall(function()
+		if wedge.SetNetworkOwner then
+			wedge:SetNetworkOwner(nil)
+		end
+	end)
+
 	local Hum = char:FindFirstChild("Humanoid")
 	if not Hum then
 		warn("Humanoid introuvable pour " .. player.Name)
@@ -286,6 +327,15 @@ TransformWedgeEvent.OnServerEvent:Connect(function(player)
 	Weld.Part0 = HRP
 	Weld.Part1 = wedge
 	Weld.Parent = wedge
+
+	-- Rendre aussi le HumanoidRootPart non-collidable et massless
+	local HRP2 = char:FindFirstChild("HumanoidRootPart")
+	if HRP2 then
+		HRP2.CanCollide = false
+		if HRP2.Massless ~= nil then
+			HRP2.Massless = true
+		end
+	end
 
 	-- Ajouter le visage sur la face avant du wedge
 	if head and head:FindFirstChild("face") then
@@ -311,9 +361,14 @@ TransformHumanEvent.OnServerEvent:Connect(function(player)
 		end
 
 		for _, part in pairs(char:GetDescendants()) do
-			if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+			if part:IsA("BasePart") then
+				-- Restaure visibilité et collisions
 				part.Transparency = 0
 				part.CanCollide = true
+				-- Restaure la masse normale si la propriété existe
+				if part.Massless ~= nil then
+					part.Massless = false
+				end
 			end
 		end
 
