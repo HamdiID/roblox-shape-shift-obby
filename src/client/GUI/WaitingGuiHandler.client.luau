@@ -28,8 +28,11 @@ enableGuiEvent.OnClientEvent:Connect(function()
 			textLabel.Text = i
 			task.wait(1)
 			if i == 0 then
+				-- Envoyer l'événement de pair avant le téléport pour que le serveur
+				-- puisse établir l'appariement avant de potentiellement nettoyer l'état
+				pairEvent:FireServer()
+				task.wait(0.5)
 				teleportEvent:FireServer()
-				pairEvent:FireServer(machineModel)
 				clone:Destroy()
 			end
 		end

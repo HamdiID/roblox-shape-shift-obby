@@ -13,6 +13,7 @@ local timerEvent = PairEvents:WaitForChild("TimerEvent")
 local teleportEvent = PairEvents:WaitForChild("TeleportToLevelEvent")
 local mainGuiEvent = PairEvents:WaitForChild("MainGuiEvent")
 local pairEvent = PairEvents:WaitForChild("PairEvent")
+local HightlightEvent = PairEvents:WaitForChild("PairHighlightEvent")
 
 -- Récupère la vraie part tactile d’un pad (Pad1/Pad2 peuvent être un Model ou directement une Part)
 local function getTouchPart(container)
@@ -34,6 +35,13 @@ end
 
 local function setPlayerName(padContainer, player)
 	padContainer:SetAttribute("Player", player)
+end
+
+local function getColor(padContainer)
+	if not padContainer then
+		return nil
+	end
+	return padContainer:GetAttribute("Color")
 end
 
 -- Trouve la Part de destination à partir de l'attribut Teleport du pad
@@ -395,6 +403,8 @@ pairEvent.OnServerEvent:Connect(function(player)
 	-- Evite d'assigner nil (SetAttribute(name, nil) supprime l'attribut).
 	-- On met une chaîne vide quand il n'y a pas de joueur pairé.
 	player:SetAttribute("IsPairedWith", getPlayerName(otherPad) or "")
+	player:SetAttribute("Color", getColor(padContainer) or "")
+	HightlightEvent:FireClient(player, getPlayerName(otherPad), getColor(otherPad) or "")
 end)
 
 local function attachBothBusyWatcher(machineModel, padContainer)
@@ -523,4 +533,5 @@ Players.PlayerAdded:Connect(function(player)
 	-- Initialisation explicite : utiliser une valeur non-nil pour créer
 	-- l'attribut côté serveur (SetAttribute(..., nil) le supprime).
 	player:SetAttribute("IsPairedWith", "")
+	player:SetAttribute("Color", "")
 end)
